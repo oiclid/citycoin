@@ -1,11 +1,59 @@
-# poxl
+# City Coins on Stacks
+
+- [City Coins on Stacks](#city-coins-on-stacks)
+  - [Contributing](#contributing)
+  - [Testing](#testing)
+  - [Launch Requirements](#launch-requirements)
+  - [References](#references)
+  - [Original README](#original-readme)
+    - [How to Use](#how-to-use)
+    - [How to Develop](#how-to-develop)
+
+This repository contains code to recreate the [Proof of Transfer consensus mechanism](https://docs.stacks.co/understand-stacks/proof-of-transfer) via a smart contract on the [Stacks blockchain](https://www.stacks.co/).
+
+The contract is further modified to support the creation of a "city coin", following the properties outlined below and within the [Product Requirements Document](./citycoin-prd.md).
+
+## Contributing
+
+PRs are welcome! Please see the [open issues here](https://github.com/citycoins/citycoin/issues) and comment if interested.
+
+All code submitted should be thoroughly commented and tested where applicable.
+
+Configurable options for the smart contract or the web UI should be listed as constants.
+
+## Testing
+
+To test the contract, use `clarity-cli` ([setup instructions here](./setup-clarity-cli.md)) and the bash script in the `./tests/` directory:
+
+```bash
+cd tests/ && ./run-tests.sh
+```
+
+## Launch Requirements
+
+- [ ] draft whitepaper created based on current [product requirements document](./citycoin-prd.md)
+- [ ] successful legal review of policies and regulations around a fair launch and city acquisition of custodied tokens
+- [ ] contract deployed to testnet implementing and successfully demonstrating all points above
+- [ ] basic UI for mining/stacking deployed on a public-facing website (TBD)
+- [ ] contract code and UI audit by an independent 3rd party
+- [ ] successful UI deployment to the Stacks blockchain mainnet
+- [ ] activation of the mining function by independent miners :tada:
+
+## References
+
+- [Stacks Proof of Transfer Whitepaper](https://gaia.blockstack.org/hub/1AxyPunHHAHiEffXWESKfbvmBpGQv138Fp/stacks.pdf)
+- [City Coins Product Requirements Document](./citycoin-prd.md)
+- [Clarity Language Reference](https://docs.stacks.co/references/language-overview)
+- [Build apps with Stacks](https://docs.stacks.co/build-apps/overview)
+
+## Original README
 
 A PoX-Lite Stackable Token (POXL).
 
 **This code is for educational and demonstration purposes only.  IT HAS NOT BEEN
 AUDITED.**
 
-## How to Use
+### How to Use
 
 Tokens are minted through a mining process.  Anyone can call the `(mine-tokens)`
 public function to commit STX to the contract in a bid to win the current Stacks
@@ -32,7 +80,7 @@ This contract confirms to the draft version of [SIP
 010](https://github.com/stacksgov/sips/pull/5/) for token transfers, making
 it possible to trade POXLs via a standard API.
 
-## How to Develop
+### How to Develop
 
 To run (and hack on) the tests, you will need to build and install `clarity-cli` from the
 [Stacks Blockchain](https://github.com/blockstack/stacks-blockchain) repo, and

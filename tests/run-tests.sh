@@ -1,10 +1,17 @@
 #!/bin/bash
 
-contract="../poxl.clar"
-initial_allocations="./initial-balances.json"
+script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+contract_name="citycoin"
+
+contract="${script_dir}/../${contract_name}.clar"
+initial_allocations="${script_dir}/initial-balances.json"
 contract_addr="SPP5ERW9P30ZQ9S7KGEBH042E7EJHWDT2Z5K086D"
-contract_id="$contract_addr.poxl"
+contract_id="${contract_addr}.${contract_name}"
 tx_sender="S1G2081040G2081040G2081040G208105NK8PE5"
+
+sip10_contract="${script_dir}/sip-10-ft-standard.clar"
+sip10_contract_addr="SP3FBR2AGK5H9QBDH3EEN6DF8EK8JY7RX8QJ5SVTE"
+sip10_contract_id="${sip10_contract_addr}.sip-10-ft-standard"
 
 specific_test="$1"
 
@@ -12,10 +19,20 @@ set -ueo pipefail
 
 which clarity-cli >/dev/null 2>&1 || ( echo >&2 "No clarity-cli in PATH"; exit 1 )
 
+test_header() {
+   local test_name=$1
+
+   echo -e "
+==========================
+   Run test ${test_name}
+=========================="
+}
+
 run_test() {
    local test_name="$1"
    local test_dir="$2"
-   echo "Run test $test_name"
+
+   test_header "${test_name}"
 
    local result="$(clarity-cli execute "$test_dir" "$contract_id" "$test_name" "$tx_sender" 2>&1)"
    local rc=$?
@@ -26,12 +43,12 @@ run_test() {
    fi
 }
 
-for contract_test in $(ls ./test-*.clar); do
+for contract_test in $(ls ${script_dir}/test-*.clar); do
    if [ -n "$specific_test" ] && [ "$contract_test" != "$specific_test" ]; then
       continue;
    fi
 
-   test_dir="/tmp/vm-poxl-$(basename "$contract_test").db"
+   test_dir="/tmp/vm-${contract_name}-$(basename "$contract_test").db"
    test -d "$test_dir" && rm -rf "$test_dir"
 
    mkdir -p "$test_dir"
@@ -41,6 +58,9 @@ for contract_test in $(ls ./test-*.clar); do
    echo "Tests begin at line $(wc -l "$contract" | cut -d ' ' -f 1)"
    cat "$contract" "$contract_test" > "$test_dir/contract-with-tests.clar"
 
+   echo "Instatiate SIP-10 contract"
+   clarity-cli launch "${sip10_contract_id}" "${sip10_contract}" "${test_dir}"
+
    echo "Instantiate $contract_id"
    clarity-cli launch "$contract_id" "$test_dir/contract-with-tests.clar" "$test_dir"
 
@@ -49,12 +69,9 @@ for contract_test in $(ls ./test-*.clar); do
       grep 'Transaction executed and committed. Returned: ' | \
       sed -r -e 's/Transaction executed and committed. Returned: \((.+)\)/\1/g' -e 's/"//g')"
 
-   echo "$tests"
-   set -- $tests
+   echo "Tests: ${tests}"
 
-   testname=""
-   for i in $(seq 1 $#); do
-      eval "test_name=$(echo "\$""$i")"
-      run_test "$test_name" "$test_dir"
+   for test_name in $tests; do
+      run_test "${test_name}" "${test_dir}"
    done
 done
